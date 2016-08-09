@@ -1,0 +1,10 @@
+name: TTCivilization
+version: 0.0.0.1
+main: TTCivilizations.TTCivilizationsPlugins
+commands:
+  Civilization:
+    usage: /civil
+    description: all Civilization commands
+    aliases: [civil, c]
+    permission: civilization.cmd
+    permission-message: You have been banned from using the Civilization plugin

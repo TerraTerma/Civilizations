@@ -8,13 +8,13 @@ import TTCore.Entity.Living.Human.Player.TTAccount;
 
 public enum PlayerPermission {
 
-	NONE(false, "join"),
+	NONE(false, "join", "create"),
 	STANDARD(false),
 	DEMI_MOD(true),
 	MOD(false, "invite", "reject", "kick"),
 	DEMI_LEADER(true),
 	LEADER(false, "expand", "autoexpand", "kick");
-
+	
 	String[] ARGS;
 	boolean IS_DEMI;
 
