@@ -5,6 +5,7 @@ public enum PlayerRole {
 	BUILDER,
 	DEFENDER,
 	ATTACKER,
-	GUARDENER
+	GUARDENER,
+	NONE;
 
 }
