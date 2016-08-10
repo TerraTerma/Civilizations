@@ -13,7 +13,7 @@ public enum PlayerPermission {
 	DEMI_MOD(true),
 	MOD(false, "invite", "reject", "kick"),
 	DEMI_LEADER(true),
-	LEADER(false, "expand", "autoexpand", "kick");
+	LEADER(false, "expand", "autoexpand", "permission");
 	
 	String[] ARGS;
 	boolean IS_DEMI;

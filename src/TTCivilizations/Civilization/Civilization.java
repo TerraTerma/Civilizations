@@ -115,6 +115,19 @@ public class Civilization extends AbstractSavableDataStore {
 		account.getSingleData(CivilizationData.class).get().setPermission(permission).setRole(role);
 		UUIDS.add(account.getPlayer().getUniqueId());
 	}
+	
+	public TTAccount getLeader(){
+		return getAccounts(PlayerPermission.LEADER).get(0);
+	}
+	
+	public Optional<TTAccount> getDemiLeader(){
+		List<TTAccount> list = getAccounts(PlayerPermission.DEMI_LEADER);
+		if(list.isEmpty()){
+			return Optional.empty();
+		}else{
+			return Optional.of(list.get(0));
+		}
+	}
 
 	public List<TTAccount> getAccounts(PlayerPermission permission) {
 		return getAccounts().stream().filter(a -> {
