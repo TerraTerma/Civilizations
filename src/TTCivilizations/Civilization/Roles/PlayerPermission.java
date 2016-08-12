@@ -4,7 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 import TTCivilizations.Civilization.Civilization;
+import TTCivilizations.Mechs.PlayerMechs.CivilizationData;
 import TTCore.Entity.Living.Human.Player.TTAccount;
+import TTCore.Entity.Living.Human.Player.TTPlayer;
+import TTCore.Entity.Living.Human.Player.Lists.AccountList;
 
 public enum PlayerPermission {
 
@@ -25,6 +28,25 @@ public enum PlayerPermission {
 	
 	public boolean isDemi(){
 		return IS_DEMI;
+	}
+	
+	public AccountList<TTPlayer> getNextOnline(TTAccount account){
+		AccountList<TTPlayer> list = new AccountList<>();
+		Optional<Civilization> opCivil = Civilization.getByPlayer(account.getPlayer().getUniqueId());
+		if(opCivil.isPresent()){
+			CivilizationData data = account.getSingleData(CivilizationData.class).get();
+			Civilization civil = opCivil.get();
+			Optional<PlayerPermission> opPermission = data.getPermission().getNextPermission();
+			if(opPermission.isPresent()){
+				civil.getAccounts(opPermission.get()).stream().forEach(p -> {
+					Optional<TTPlayer> opPlayer = p.getOnline();
+					if(opPlayer.isPresent()){
+						list.add(opPlayer.get());
+					}
+				});
+			}
+		}
+		return list;
 	}
 
 	public String[] getExtraCMD(TTAccount player) {

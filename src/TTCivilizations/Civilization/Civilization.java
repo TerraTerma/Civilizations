@@ -21,6 +21,7 @@ import TTCivilizations.Mechs.PlayerMechs.CivilizationData;
 import TTCore.Entity.Implementation.Living.Human.Player.TTAccountImp;
 import TTCore.Entity.Living.Human.Player.TTAccount;
 import TTCore.Entity.Living.Human.Player.TTPlayer;
+import TTCore.Entity.Living.Human.Player.Lists.AccountList;
 import TTCore.Mech.DataHandler;
 import TTCore.Mech.DataHandlers.SavableData;
 import TTCore.Mech.DataStores.SavableDataStore.AbstractSavableDataStore;
@@ -129,22 +130,30 @@ public class Civilization extends AbstractSavableDataStore {
 		}
 	}
 
-	public List<TTAccount> getAccounts(PlayerPermission permission) {
-		return getAccounts().stream().filter(a -> {
+	public AccountList<TTAccount> getAccounts(PlayerPermission permission) {
+		AccountList<TTAccount> list = new AccountList<>();
+		getAccounts().stream().forEach(a -> {
 			CivilizationData data = a.getSingleData(CivilizationData.class).get();
-			return (data.getPermission().equals(permission));
-		}).collect(Collectors.toList());
+			if (data.getPermission().equals(permission)){
+				list.add(a);
+			}
+		});
+		return list;
 	}
 
-	public List<TTAccount> getAccounts(PlayerRole role) {
-		return getAccounts().stream().filter(a -> {
+	public AccountList<TTAccount> getAccounts(PlayerRole role) {
+		AccountList<TTAccount> list = new AccountList<>();
+		getAccounts().stream().forEach(a -> {
 			CivilizationData data = a.getSingleData(CivilizationData.class).get();
-			return (data.getRole().equals(role));
-		}).collect(Collectors.toList());
+			if (data.getRole().equals(role)){
+				list.add(a);
+			}
+		});
+		return list;
 	}
 
-	public List<TTAccount> getAccounts() {
-		List<TTAccount> list = new ArrayList<>();
+	public AccountList<TTAccount> getAccounts() {
+		AccountList<TTAccount> list = new AccountList<>();
 		UUIDS.stream().forEach(u -> {
 			Optional<TTPlayer> opPlayer = TTPlayer.getPlayer(u);
 			if (opPlayer.isPresent()) {
