@@ -44,6 +44,7 @@ public class Civilization extends AbstractSavableDataStore {
 	public static String DATA_WORLD = "MetaData.World";
 	public static String DATA_MEMBERS = "Data.Members";
 	public static String DATA_SECTIONS = "MetaData.Sections";
+	public static String DATA_FLAGS = "Data.Flags";
 
 	public Civilization(String name, CivilizationType type) {
 		super(new File(ROOT_FILE, type.getName() + "/" + name + ".yml"));
