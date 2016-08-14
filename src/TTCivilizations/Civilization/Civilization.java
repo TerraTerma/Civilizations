@@ -6,221 +6,30 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 
-import TTCivilizations.Civilization.Chunk.Section;
-import TTCivilizations.Civilization.Chunk.SectionType;
-import TTCivilizations.Civilization.Flags.CivilizationFlag;
-import TTCivilizations.Civilization.Roles.PlayerPermission;
-import TTCivilizations.Civilization.Roles.PlayerRole;
-import TTCivilizations.Mechs.CivilData;
-import TTCivilizations.Mechs.PlayerMechs.CivilizationData;
-import TTCore.Entity.Implementation.Living.Human.Player.TTAccountImp;
-import TTCore.Entity.Living.Human.Player.TTAccount;
-import TTCore.Entity.Living.Human.Player.TTPlayer;
-import TTCore.Entity.Living.Human.Player.Lists.AccountList;
-import TTCore.Mech.DataHandler;
-import TTCore.Mech.DataHandlers.SavableData;
-import TTCore.Mech.DataStores.SavableDataStore.AbstractSavableDataStore;
+import TTCivilizations.Civilization.Types.DefaultCivilization;
+import TTCivilizations.Civilization.Types.UserCivilization;
 import TTCore.Savers.Saver;
 
-public class Civilization extends AbstractSavableDataStore {
-
-	String NAME;
-	List<Section> SECTIONS = new ArrayList<>();
-	List<CivilizationFlag<? extends Object>> FLAGS = new ArrayList<>();
-	public List<UUID> UUIDS = new ArrayList<>();
-
-	static List<Civilization> CIVILS = new ArrayList<>();
-
+public interface Civilization {
+	
 	public static final File ROOT_FILE = new File("plugins/TTCore/Civilization");
-	public static final Civilization WILDERNESS = new Civilization("Wilderness", CivilizationType.DEFAULT);
-	public static final Civilization WAR_ZONE = new Civilization("War Zone", CivilizationType.DEFAULT);
-	public static final Civilization SAFE_ZONE = new Civilization("Safe Zone", CivilizationType.DEFAULT);
-
 	public static String DATA_NAME = "MetaData.Name";
 	public static String DATA_WORLD = "MetaData.World";
 	public static String DATA_MEMBERS = "Data.Members";
 	public static String DATA_SECTIONS = "MetaData.Sections";
 	public static String DATA_FLAGS = "Data.Flags";
-
-	public Civilization(String name, CivilizationType type) {
-		super(new File(ROOT_FILE, type.getName() + "/" + name + ".yml"));
-		NAME = name;
-		Saver saver = new Saver(getFile());
-		if (saver.getFile().exists()) {
-			String worldS = saver.get(String.class, DATA_WORLD);
-			if (worldS != null) {
-				World world = Bukkit.getWorld(worldS);
-				List<String> sectionS = saver.getList(String.class, DATA_SECTIONS);
-				List<String> uuidS = saver.getList(String.class, DATA_MEMBERS);
-				sectionS.stream().forEach(s -> {
-					String[] args = s.split(",");
-					if (args.length == 3) {
-						Chunk chunk = world.getChunkAt(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
-						SectionType sectionType = SectionType.valueOf(args[2]);
-						addChunk(chunk, sectionType);
-					} else {
-						Chunk chunk = world.getChunkAt(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
-						SectionType sectionType = SectionType.valueOf(args[2]);
-						addChunk(chunk, sectionType, args[3]);
-					}
-				});
-				uuidS.stream().forEach(u -> {
-					UUIDS.add(UUID.fromString(u));
-				});
-				DataHandler.getHandlers().stream().forEach(d -> {
-					try {
-						DataHandler data = d.newInstance();
-						if ((data instanceof SavableData) && (data instanceof CivilData)) {
-							SavableData data2 = (SavableData) data;
-							saver.setSection("Mechs", d.getSimpleName());
-							if (data2.load(saver)) {
-								DATA.add(data2);
-							}
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				});
-			}
-		}
-	}
-
-	public String getName() {
-		return NAME;
-	}
-
-	public List<Section> getSections() {
-		return SECTIONS;
-	}
-
-	public void addChunk(Chunk chunk) {
-		SECTIONS.add(new Section(null, SectionType.NONE, chunk));
-	}
-
-	public void addChunk(Chunk chunk, String name) {
-		SECTIONS.add(new Section(name, SectionType.NONE, chunk));
-	}
-
-	public void addChunk(Chunk chunk, SectionType type) {
-		SECTIONS.add(new Section(null, type, chunk));
-	}
-
-	public void addChunk(Chunk chunk, SectionType type, String name) {
-		SECTIONS.add(new Section(name, type, chunk));
-	}
 	
-	public void addPlayer(TTAccount account, PlayerRole role, PlayerPermission permission){
-		account.getSingleData(CivilizationData.class).get().setPermission(permission).setRole(role);
-		UUIDS.add(account.getPlayer().getUniqueId());
-	}
+	public String getName();
 	
-	public TTAccount getLeader(){
-		return getAccounts(PlayerPermission.LEADER).get(0);
-	}
-	
-	public Optional<TTAccount> getDemiLeader(){
-		List<TTAccount> list = getAccounts(PlayerPermission.DEMI_LEADER);
-		if(list.isEmpty()){
-			return Optional.empty();
-		}else{
-			return Optional.of(list.get(0));
-		}
-	}
-
-	public AccountList<TTAccount> getAccounts(PlayerPermission permission) {
-		AccountList<TTAccount> list = new AccountList<>();
-		getAccounts().stream().forEach(a -> {
-			CivilizationData data = a.getSingleData(CivilizationData.class).get();
-			if (data.getPermission().equals(permission)){
-				list.add(a);
-			}
-		});
-		return list;
-	}
-
-	public AccountList<TTAccount> getAccounts(PlayerRole role) {
-		AccountList<TTAccount> list = new AccountList<>();
-		getAccounts().stream().forEach(a -> {
-			CivilizationData data = a.getSingleData(CivilizationData.class).get();
-			if (data.getRole().equals(role)){
-				list.add(a);
-			}
-		});
-		return list;
-	}
-
-	public AccountList<TTAccount> getAccounts() {
-		AccountList<TTAccount> list = new AccountList<>();
-		UUIDS.stream().forEach(u -> {
-			Optional<TTPlayer> opPlayer = TTPlayer.getPlayer(u);
-			if (opPlayer.isPresent()) {
-				list.add(opPlayer.get());
-			} else {
-				TTAccount account = new TTAccountImp(Bukkit.getOfflinePlayer(u));
-				list.add(account);
-			}
-		});
-		return list;
-	}
-
-	public boolean load() {
-		if (!isLoaded()) {
-			return CIVILS.add(this);
-		}
-		return false;
-	}
-
-	public List<Section> getLoadedSections() {
-		if (CIVILS.contains(this)) {
-			return SECTIONS.stream().filter(s -> {
-				return (s.getChunk().isLoaded());
-			}).collect(Collectors.toList());
-		}
-		return new ArrayList<>();
-	}
-
-	public boolean isLoaded() {
-		return (!getLoadedSections().isEmpty());
-	}
-
-	public boolean unload() {
-		return CIVILS.remove(this);
-	}
-
-	@Override
-	public void saveAll() {
-		Saver saver = new Saver(getFile());
-		List<String> sectionS = new ArrayList<>();
-		List<String> uuidS = new ArrayList<>();
-		SECTIONS.stream().forEach(s -> {
-			Chunk chunk = s.getChunk();
-			String section = chunk.getX() + "," + chunk.getZ() + "," + s.getType().name();
-			if (s.getName().isPresent()) {
-				section = section + "," + s.getName().get();
-			}
-			sectionS.add(section);
-		});
-		UUIDS.stream().forEach(u -> {
-			uuidS.add(u.toString());
-		});
-
-		saver.set(sectionS, DATA_SECTIONS);
-		saver.set(SECTIONS.get(0).getChunk().getWorld().getName(), DATA_WORLD);
-		saver.set(uuidS, DATA_MEMBERS);
-		saver.save();
-		super.saveAll();
-	}
-
 	public static List<Civilization> getByWorld(World world) {
 		List<Civilization> list = new ArrayList<>();
-		File folderUser = new File(ROOT_FILE, CivilizationType.USER.getName());
-		File folderDefault = new File(ROOT_FILE, CivilizationType.DEFAULT.getName());
+		File folderUser = new File(ROOT_FILE, "User");
+		File folderDefault = new File(ROOT_FILE, "Default");
 		File[] filesUser = folderUser.listFiles();
 		File[] filesDefault = folderDefault.listFiles();
 		if (filesUser != null) {
@@ -229,7 +38,7 @@ public class Civilization extends AbstractSavableDataStore {
 				String worldS = saver.get(String.class, DATA_WORLD);
 				return (world.getName().equals(worldS));
 			}).findFirst();
-			list.add(new Civilization(civil.get().getName().replace(".yml", ""), CivilizationType.USER));
+			list.add(new UserCivilization(civil.get().getName().replace(".yml", "")));
 		}
 		if (filesDefault != null) {
 			Optional<File> civil = Arrays.asList(filesDefault).stream().filter(f -> {
@@ -240,33 +49,31 @@ public class Civilization extends AbstractSavableDataStore {
 			String name = civil.get().getName().replace(".yml", "");
 			switch (name) {
 			case "War Zone":
-				list.add(WAR_ZONE);
+				list.add(DefaultCivilization.WAR_ZONE);
 			case "Safe Zone":
-				list.add(SAFE_ZONE);
+				list.add(DefaultCivilization.SAFE_ZONE);
 			}
 		}
-		list.add(WILDERNESS);
+		list.add(DefaultCivilization.WILDERNESS);
 		return list;
 	}
 
-	public static Optional<Civilization> getLoadedByChunk(Chunk chunk) {
+	public static Optional<SectionedCivilization> getLoadedByChunk(Chunk chunk) {
 		if (chunk.isLoaded()) {
-			Optional<Civilization> opCivil = CIVILS.stream().filter(e -> {
+			Optional<SectionedCivilization> opCivil = UserCivilization.CIVILS.stream().filter(e -> {
 				return e.getSections().stream().filter(s -> {
 					return s.getChunk().equals(chunk);
 				}).findFirst().isPresent();
 			}).findFirst();
 			if (opCivil.isPresent()) {
-				return opCivil;
-			} else {
-				return Optional.of(WILDERNESS);
+				return Optional.of(opCivil.get());
 			}
 		}
 		return Optional.empty();
 	}
 
-	public static Optional<Civilization> getByPlayer(UUID uuid) {
-		File folderUser = new File(ROOT_FILE, CivilizationType.USER.getName());
+	public static Optional<UserCivilization> getByPlayer(UUID uuid) {
+		File folderUser = new File(ROOT_FILE, "User");
 		File[] filesUser = folderUser.listFiles();
 		if (filesUser != null) {
 			Optional<File> opFile = Arrays.asList(filesUser).stream().filter(f -> {
@@ -274,15 +81,15 @@ public class Civilization extends AbstractSavableDataStore {
 				return (saver.getList(String.class, DATA_MEMBERS).stream().anyMatch(u -> u.equals(uuid.toString())));
 			}).findFirst();
 			if (opFile.isPresent()) {
-				return Optional.of(new Civilization(opFile.get().getName().replace(".yml", ""), CivilizationType.USER));
+				return Optional.of(new UserCivilization(opFile.get().getName().replace(".yml", "")));
 			}
 		}
 		return Optional.empty();
 	}
 
 	public static Civilization getByChunk(Chunk chunk) {
-		File folderUser = new File(ROOT_FILE, CivilizationType.USER.getName());
-		File folderDefault = new File(ROOT_FILE, CivilizationType.DEFAULT.getName());
+		File folderUser = new File(ROOT_FILE, "User");
+		File folderDefault = new File(ROOT_FILE, "Default");
 		File[] filesUser = folderUser.listFiles();
 		File[] filesDefault = folderDefault.listFiles();
 		if (filesUser != null) {
@@ -304,7 +111,7 @@ public class Civilization extends AbstractSavableDataStore {
 				return false;
 			}).findFirst();
 			if (civil.isPresent()) {
-				return new Civilization(civil.get().getName().replace(".yml", ""), CivilizationType.USER);
+				return new UserCivilization(civil.get().getName().replace(".yml", ""));
 			}
 		}
 		if (filesDefault != null) {
@@ -328,26 +135,33 @@ public class Civilization extends AbstractSavableDataStore {
 				String name = civil.get().getName().replace(".yml", "");
 				switch (name) {
 				case "War Zone":
-					return WAR_ZONE;
+					return DefaultCivilization.WAR_ZONE;
 				case "Safe Zone":
-					return SAFE_ZONE;
+					return DefaultCivilization.SAFE_ZONE;
 				}
 			}
 		}
-		return WILDERNESS;
+		return DefaultCivilization.WILDERNESS;
 	}
 
-	public static Optional<Civilization> getLoadedByPlayer(UUID uuid) {
-		return CIVILS.stream().filter(c -> {
-			return c.UUIDS.stream().anyMatch(u -> {
+	public static Optional<UserCivilization> getLoadedByPlayer(UUID uuid) {
+		Optional<SectionedCivilization> opCivil = SectionedCivilization.CIVILS.stream().filter(c -> {
+			if(c instanceof UserCivilization){
+			return ((UserCivilization)c).UUIDS.stream().anyMatch(u -> {
 				return (u.equals(uuid));
 			});
+			}
+			return false;
 		}).findFirst();
+		if(opCivil.isPresent()){
+			return Optional.of((UserCivilization)opCivil.get());
+		}
+		return Optional.empty();
 	}
 	
 	public static void reload(){
-		File folderUser = new File(ROOT_FILE, CivilizationType.USER.getName());
-		File folderDefault = new File(ROOT_FILE, CivilizationType.DEFAULT.getName());
+		File folderUser = new File(ROOT_FILE, "User");
+		File folderDefault = new File(ROOT_FILE, "Default");
 		File[] filesUser = folderUser.listFiles();
 		File[] filesDefault = folderDefault.listFiles();
 		if (filesUser != null) {
@@ -367,7 +181,7 @@ public class Civilization extends AbstractSavableDataStore {
 				return false;
 			}).findFirst();
 			if (civil.isPresent()) {
-				Civilization civil2 = new Civilization(civil.get().getName().replace(".yml", ""), CivilizationType.USER);
+				UserCivilization civil2 = new UserCivilization(civil.get().getName().replace(".yml", ""));
 				civil2.load();
 			}
 		}
@@ -391,9 +205,9 @@ public class Civilization extends AbstractSavableDataStore {
 				String name = civil.get().getName().replace(".yml", "");
 				switch (name) {
 				case "War Zone":
-					WAR_ZONE.load();
+					DefaultCivilization.WAR_ZONE.load();
 				case "Safe Zone":
-					SAFE_ZONE.load();
+					DefaultCivilization.SAFE_ZONE.load();
 				}
 			}
 		}

@@ -8,11 +8,11 @@ import org.bukkit.Chunk;
 
 import TTCivilizations.TTCivilizationsPlugins;
 import TTCivilizations.Civilization.Civilization;
-import TTCivilizations.Civilization.CivilizationType;
 import TTCivilizations.Civilization.Chunk.ChunkUtils;
 import TTCivilizations.Civilization.Chunk.SectionType;
 import TTCivilizations.Civilization.Roles.PlayerPermission;
 import TTCivilizations.Civilization.Roles.PlayerRole;
+import TTCivilizations.Civilization.Types.UserCivilization;
 import TTCivilizations.Mechs.CivilMechs.Vault.CivilVaultData;
 import TTCivilizations.Mechs.CivilMechs.Vault.CivilVaultType;
 import TTCivilizations.Mechs.PlayerMechs.CivilizationData;
@@ -26,11 +26,11 @@ public class CreateCMD {
 	public static void createCivil(TTPlayer player, String name) {
 		TTCivilizationsPlugins plugin = TTCivilizationsPlugins.getPlugin();
 		CivilizationData data = player.getSingleData(CivilizationData.class).get();
-		Optional<Civilization> opCivil = Civilization.getByPlayer(player.getPlayer().getUniqueId());
+		Optional<UserCivilization> opCivil = Civilization.getByPlayer(player.getPlayer().getUniqueId());
 		if (!opCivil.isPresent()) {
 			if (data.getPower() >= 10) {
 				if (player.getBalance() >= PRICE_OF_CIVIL) {
-					Civilization civil = new Civilization(name, CivilizationType.USER);
+					UserCivilization civil = new UserCivilization(name);
 					civil.addChunk(player.getPlayer().getLocation().getChunk(), "Source");
 					civil.addPlayer(player, PlayerRole.NONE, PlayerPermission.LEADER);
 					civil.load();
@@ -52,9 +52,9 @@ public class CreateCMD {
 		CivilizationData data = player.getSingleData(CivilizationData.class).get();
 		List<String> args = Arrays.asList(data.getPermission().getExtraCMD(player));
 		if(args.contains("expand") || args.contains("autoexpand")){
-			Optional<Civilization> opCivil = Civilization.getLoadedByPlayer(player.getPlayer().getUniqueId());
+			Optional<UserCivilization> opCivil = Civilization.getLoadedByPlayer(player.getPlayer().getUniqueId());
 			if(opCivil.isPresent()){
-				Civilization civil = opCivil.get();
+				UserCivilization civil = opCivil.get();
 				Chunk chunk = player.getPlayer().getLocation().getChunk();
 				boolean check = false;
 				for(int X = -1 ; X < 2; X++){

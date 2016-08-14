@@ -20,6 +20,9 @@ import org.bukkit.event.world.ChunkUnloadEvent;
 
 import TTCivilizations.TTCivilizationsPlugins;
 import TTCivilizations.Civilization.Civilization;
+import TTCivilizations.Civilization.SectionedCivilization;
+import TTCivilizations.Civilization.Types.DefaultCivilization;
+import TTCivilizations.Civilization.Types.UserCivilization;
 import TTCivilizations.Mechs.CivilMechs.CivilRelationshipData.CivilRelationshipData;
 import TTCivilizations.Mechs.CivilMechs.CivilRelationshipData.CivilRelationshipType;
 import TTCivilizations.Mechs.PlayerMechs.CivilizationData;
@@ -35,9 +38,10 @@ public class Listeners implements Listener {
 			// DEATH EVENT
 			TTPlayer ttPlayer = TTPlayer.getPlayer(player);
 			
-			Optional<Civilization> opCurrentCivil = Civilization.getLoadedByChunk(player.getLocation().getChunk());
+			Optional<SectionedCivilization> opCurrentCivil = Civilization.getLoadedByChunk(player.getLocation().getChunk());
 			if (opCurrentCivil.isPresent()) {
-				Civilization civil = opCurrentCivil.get();
+				if(opCurrentCivil.get() instanceof UserCivilization){
+				UserCivilization civil = (UserCivilization)opCurrentCivil.get();
 				if (civil.UUIDS.contains(player.getUniqueId())) {
 					event.setCancelled(true);
 				}
@@ -78,13 +82,13 @@ public class Listeners implements Listener {
 
 	@EventHandler
 	public void unloadEvent(ChunkUnloadEvent event) {
-		Optional<Civilization> opCivil = Civilization.getLoadedByChunk(event.getChunk());
+		Optional<SectionedCivilization> opCivil = Civilization.getLoadedByChunk(event.getChunk());
 		if (opCivil.isPresent()) {
 			Bukkit.getScheduler().scheduleSyncDelayedTask(TTCivilizationsPlugins.getPlugin(), new Runnable() {
 
 				@Override
 				public void run() {
-					Civilization civil = opCivil.get();
+					SectionedCivilization civil = opCivil.get();
 					if (!civil.isLoaded()) {
 						civil.unload();
 					}
@@ -98,9 +102,9 @@ public class Listeners implements Listener {
 	public void playerMoveEvent(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
 		TTPlayer ttPlayer = TTPlayer.getPlayer(player);
-		Optional<Civilization> opCivil = Civilization.getLoadedByPlayer(player.getUniqueId());
-		Optional<Civilization> opCivilTo = Civilization.getLoadedByChunk(event.getTo().getChunk());
-		Optional<Civilization> opCivilFrom = Civilization.getLoadedByChunk(event.getFrom().getChunk());
+		Optional<UserCivilization> opCivil = Civilization.getLoadedByPlayer(player.getUniqueId());
+		Optional<SectionedCivilization> opCivilTo = Civilization.getLoadedByChunk(event.getTo().getChunk());
+		Optional<SectionedCivilization> opCivilFrom = Civilization.getLoadedByChunk(event.getFrom().getChunk());
 
 		if (opCivilTo.isPresent()) {
 			if (opCivilFrom.isPresent()) {
@@ -111,7 +115,7 @@ public class Listeners implements Listener {
 						Civilization civil = opCivil.get();
 						CivilRelationshipType relationship = civil.getOrCreateSingleData(CivilRelationshipData.class)
 								.getRelationshipWith(civilTo);
-						if (civilTo.equals(Civilization.WILDERNESS)) {
+						if (civilTo.equals(DefaultCivilization.WILDERNESS)) {
 							ttPlayer.createBar(true, relationship.getBarColour(), relationship.getBarStyle(),
 									relationship.getChatColour() + "You have left " + civilFrom.getName());
 							Bukkit.getScheduler().scheduleSyncDelayedTask(TTCivilizationsPlugins.getPlugin(),
@@ -127,7 +131,7 @@ public class Listeners implements Listener {
 							ttPlayer.createBar(true, relationship.getBarColour(), relationship.getBarStyle(),
 									relationship.getChatColour() + "You are in " + civilTo.getName());
 						}
-					} else if (civilTo.equals(Civilization.WILDERNESS)) {
+					} else if (civilTo.equals(DefaultCivilization.WILDERNESS)) {
 						ttPlayer.createBar(true, BarColor.WHITE, BarStyle.SOLID,
 								"You have left " + civilFrom.getName());
 						Bukkit.getScheduler().scheduleSyncDelayedTask(TTCivilizationsPlugins.getPlugin(),
@@ -150,7 +154,9 @@ public class Listeners implements Listener {
 	@EventHandler
 	public void loadEvent(ChunkLoadEvent event) {
 		Civilization civil = Civilization.getByChunk(event.getChunk());
-		civil.load();
+		if(civil instanceof SectionedCivilization){
+			((SectionedCivilization)civil).load();
+		}
 	}
 
 }

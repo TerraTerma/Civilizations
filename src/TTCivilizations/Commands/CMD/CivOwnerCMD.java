@@ -7,6 +7,7 @@ import java.util.Optional;
 import TTCivilizations.TTCivilizationsPlugins;
 import TTCivilizations.Civilization.Civilization;
 import TTCivilizations.Civilization.Roles.PlayerPermission;
+import TTCivilizations.Civilization.Types.UserCivilization;
 import TTCivilizations.Mechs.PlayerMechs.CivilizationData;
 import TTCore.Entity.Living.Human.Player.TTAccount;
 import TTCore.Entity.Living.Human.Player.TTPlayer;
@@ -19,7 +20,7 @@ public class CivOwnerCMD {
 		CivilizationData playerData = player.getSingleData(CivilizationData.class).get();
 		List<String> ownerArgs = Arrays.asList(ownerData.getPermission().getExtraCMD(owner));
 		if (ownerArgs.contains("permission")) {
-			Civilization ownerCivil = Civilization.getByPlayer(owner.getPlayer().getUniqueId()).get();
+			UserCivilization ownerCivil = Civilization.getByPlayer(owner.getPlayer().getUniqueId()).get();
 			Optional<TTPlayer> opPlayer = player.getOnline();
 			if (ownerCivil.UUIDS.contains(player.getPlayer().getUniqueId())) {
 				switch (permission) {
