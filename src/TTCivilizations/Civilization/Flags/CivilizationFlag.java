@@ -3,7 +3,7 @@ package TTCivilizations.Civilization.Flags;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CivilizationFlag <T extends Object>{
+public abstract class CivilizationFlag <T extends Object>{
 
 	public static final List<CivilizationFlag<? extends Object>> LIST = new ArrayList<>();
 	public static final CivilizationFlag<Boolean> BLOCK_BREAK_INSIDE = createRegister("Block break from insiders", "Allow/disallow players from the civilization to break blocks", true);
@@ -26,6 +26,9 @@ public class CivilizationFlag <T extends Object>{
 		VALUE = defaultValue;
 	}
 	
+	public abstract T toValue(Object object);
+	public abstract CivilizationFlag<T> clone();
+	
 	public String getName(){
 		return NAME;
 	}
@@ -42,20 +45,32 @@ public class CivilizationFlag <T extends Object>{
 		VALUE = value;
 	}
 	
-	public CivilizationFlag<T> clone(){
-		CivilizationFlag<T> flag = new CivilizationFlag<>(NAME, DESCRIPTION, VALUE);
-		return flag;
-	}
-	
 	@Override
 	public String toString(){
 		return NAME + "," + VALUE;
 	}
 	
-	private static <T extends Object> CivilizationFlag<T> createRegister(String name, String description, T value){
-		CivilizationFlag<T> flag = new CivilizationFlag<>(name, description, value);
+	private static CivilizationFlag<Boolean> createRegister(String name, String description, boolean value){
+		CivilizationFlag<Boolean> flag = new CivilizationBooleanFlag(name, description, value);
 		LIST.add(flag);
 		return flag;
 	}
-	
+
+	public static class CivilizationBooleanFlag extends CivilizationFlag<Boolean>{
+
+		public CivilizationBooleanFlag(String name, String description, Boolean defaultValue) {
+			super(name, description, defaultValue);
+		}
+
+		@Override
+		public Boolean toValue(Object object) {
+			return Boolean.parseBoolean(object.toString());
+		}
+		
+		@Override
+		public CivilizationFlag<Boolean> clone(){
+			CivilizationFlag<Boolean> flag = new CivilizationBooleanFlag(NAME, DESCRIPTION, VALUE);
+			return flag;
+		}
+	}
 }

@@ -14,6 +14,7 @@ import org.bukkit.World;
 
 import TTCivilizations.Civilization.Chunk.Section;
 import TTCivilizations.Civilization.Chunk.SectionType;
+import TTCivilizations.Civilization.Flags.CivilizationFlag;
 import TTCivilizations.Civilization.Roles.PlayerPermission;
 import TTCivilizations.Civilization.Roles.PlayerRole;
 import TTCivilizations.Mechs.CivilData;
@@ -31,6 +32,7 @@ public class Civilization extends AbstractSavableDataStore {
 
 	String NAME;
 	List<Section> SECTIONS = new ArrayList<>();
+	List<CivilizationFlag<? extends Object>> FLAGS = new ArrayList<>();
 	public List<UUID> UUIDS = new ArrayList<>();
 
 	static List<Civilization> CIVILS = new ArrayList<>();
