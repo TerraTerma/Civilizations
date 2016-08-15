@@ -51,34 +51,34 @@ public class CreateCMD {
 		TTCivilizationsPlugins plugin = TTCivilizationsPlugins.getPlugin();
 		CivilizationData data = player.getSingleData(CivilizationData.class).get();
 		List<String> args = Arrays.asList(data.getPermission().getExtraCMD(player));
-		if(args.contains("expand") || args.contains("autoexpand")){
+		if (args.contains("expand") || args.contains("autoexpand")) {
 			Optional<UserCivilization> opCivil = Civilization.getLoadedByPlayer(player.getPlayer().getUniqueId());
-			if(opCivil.isPresent()){
+			if (opCivil.isPresent()) {
 				UserCivilization civil = opCivil.get();
 				Chunk chunk = player.getPlayer().getLocation().getChunk();
 				boolean check = false;
-				for(int X = -1 ; X < 2; X++){
-					for(int Z = -1 ; Z < 2; Z++){
+				for (int X = -1; X < 2; X++) {
+					for (int Z = -1; Z < 2; Z++) {
 						Chunk chunk2 = ChunkUtils.getRelitive(chunk, X, Z);
-						if(civil.getSections().stream().anyMatch(s -> s.getChunk().equals(chunk2))){
+						if (civil.getSections().stream().anyMatch(s -> s.getChunk().equals(chunk2))) {
 							check = true;
 							break;
 						}
 					}
 				}
-				if(check){
+				if (check) {
 					CivilVaultData vault = civil.getSingleData(CivilVaultData.class).get();
-					float price = (PRICE_OF_CHUNK*civil.getSections().size());
-					if(vault.withdraw(CivilVaultType.EXPAND, price)){
+					float price = (PRICE_OF_CHUNK * civil.getSections().size());
+					if (vault.withdraw(CivilVaultType.EXPAND, price)) {
 						civil.addChunk(chunk, type, name);
 						player.sendMessage(plugin, "chunk is now claimed");
-					}else{
+					} else {
 						player.sendMessage(plugin, "You do not have " + price + " within your Expand department");
 					}
-				}else{
+				} else {
 					player.sendMessage(plugin, "chunk must be directly touching the civilization");
 				}
-				
+
 			}
 		}
 	}

@@ -10,40 +10,40 @@ import TTCore.Savers.Saver;
 import TTCore.Stores.OneStore;
 
 public class CivilVaultData implements CivilData, SavableData {
-	
+
 	public static final String DATA_CASH = "Bal";
-	
+
 	Map<CivilVaultType, Float> CASH = new HashMap<>();
-	
-	public float getBalance(){
+
+	public float getBalance() {
 		OneStore<Float> cash = new OneStore<>(0f);
 		CASH.entrySet().stream().forEach(c -> {
 			cash.setOne(cash.getOne() + c.getValue());
 		});
 		return cash.getOne();
 	}
-	
-	public float getBalance(CivilVaultType type){
+
+	public float getBalance(CivilVaultType type) {
 		return CASH.get(type);
 	}
-	
-	public boolean withdraw(CivilVaultType type, float amount){
+
+	public boolean withdraw(CivilVaultType type, float amount) {
 		float old = getBalance(type);
-		if (old >= amount){
+		if (old >= amount) {
 			CASH.replace(type, (old - amount));
 			return true;
 		}
 		return false;
 	}
-	
-	public CivilVaultData deposit(CivilVaultType type, float amount){
+
+	public CivilVaultData deposit(CivilVaultType type, float amount) {
 		float old = getBalance(type);
 		CASH.replace(type, (old + amount));
 		return this;
 	}
-	
-	public boolean transfer(CivilVaultType from, float amount, CivilVaultType to){
-		if (withdraw(from, amount)){
+
+	public boolean transfer(CivilVaultType from, float amount, CivilVaultType to) {
+		if (withdraw(from, amount)) {
 			deposit(to, amount);
 			return true;
 		}
@@ -61,9 +61,9 @@ public class CivilVaultData implements CivilData, SavableData {
 	public boolean load(Saver saver) {
 		Arrays.asList(CivilVaultType.values()).stream().forEach(v -> {
 			Float bal = saver.get(Float.class, DATA_CASH + "." + v.name());
-			if(bal == null){
+			if (bal == null) {
 				CASH.put(v, 0f);
-			}else{
+			} else {
 				CASH.put(v, bal);
 			}
 		});

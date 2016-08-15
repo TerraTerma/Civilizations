@@ -26,42 +26,40 @@ public class CivOwnerCMD {
 				switch (permission) {
 				case DEMI_LEADER:
 					Optional<TTAccount> demiLeader = ownerCivil.getDemiLeader();
-					if(demiLeader.isPresent()){
+					if (demiLeader.isPresent()) {
 						CivilizationData dL = demiLeader.get().getSingleData(CivilizationData.class).get();
 						dL.setPermission(playerData.getPermission());
 					}
 					playerData.setPermission(permission);
-					owner.sendMessage(plugin,
-							"You have set " + player.getPlayer().getName() + " to the demi-leader.");
+					owner.sendMessage(plugin, "You have set " + player.getPlayer().getName() + " to the demi-leader.");
 					if (opPlayer.isPresent()) {
 						opPlayer.get().sendMessage(plugin, "Your leader has set you to a demi-leader.");
 					}
 					return;
 				case DEMI_MOD:
 					playerData.setPermission(permission);
-					owner.sendMessage(plugin,
-							"You have set " + player.getPlayer().getName() + " to a demi-mod.");
+					owner.sendMessage(plugin, "You have set " + player.getPlayer().getName() + " to a demi-mod.");
 					if (opPlayer.isPresent()) {
 						opPlayer.get().sendMessage(plugin, "Your leader has set you to a demi-mod.");
 					}
 					return;
 				case LEADER:
-					if(ownerData.getPermission().equals(PlayerPermission.LEADER)){
+					if (ownerData.getPermission().equals(PlayerPermission.LEADER)) {
 						ownerData.setPermission(playerData.getPermission());
 						playerData.setPermission(permission);
-						owner.sendMessage(plugin,
-								"You have set " + player.getPlayer().getName() + " to the leader, you have taken their place");
+						owner.sendMessage(plugin, "You have set " + player.getPlayer().getName()
+								+ " to the leader, you have taken their place");
 						if (opPlayer.isPresent()) {
-							opPlayer.get().sendMessage(plugin, "Your leader has set you as the leader, they have taken your place");
+							opPlayer.get().sendMessage(plugin,
+									"Your leader has set you as the leader, they have taken your place");
 						}
-					}else{
+					} else {
 						owner.sendMessage(plugin, "Only the true owner can do that");
 					}
 					return;
 				case MOD:
 					playerData.setPermission(permission);
-					owner.sendMessage(plugin,
-							"You have set " + player.getPlayer().getName() + " to a mod.");
+					owner.sendMessage(plugin, "You have set " + player.getPlayer().getName() + " to a mod.");
 					if (opPlayer.isPresent()) {
 						opPlayer.get().sendMessage(plugin, "Your leader has set you to a mod.");
 					}

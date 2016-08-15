@@ -11,21 +11,26 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 
+import TTCivilizations.Civilization.Flags.CivilizationFlag;
 import TTCivilizations.Civilization.Types.DefaultCivilization;
 import TTCivilizations.Civilization.Types.UserCivilization;
 import TTCore.Savers.Saver;
 
 public interface Civilization {
-	
+
 	public static final File ROOT_FILE = new File("plugins/TTCore/Civilization");
 	public static String DATA_NAME = "MetaData.Name";
 	public static String DATA_WORLD = "MetaData.World";
 	public static String DATA_MEMBERS = "Data.Members";
 	public static String DATA_SECTIONS = "MetaData.Sections";
 	public static String DATA_FLAGS = "Data.Flags";
-	
+
 	public String getName();
 	
+	public List<CivilizationFlag<? extends Object>> getFlags();
+	
+	public Optional<CivilizationFlag<? extends Object>> getFlag(String name);
+
 	public static List<Civilization> getByWorld(World world) {
 		List<Civilization> list = new ArrayList<>();
 		File folderUser = new File(ROOT_FILE, "User");
@@ -146,20 +151,20 @@ public interface Civilization {
 
 	public static Optional<UserCivilization> getLoadedByPlayer(UUID uuid) {
 		Optional<SectionedCivilization> opCivil = SectionedCivilization.CIVILS.stream().filter(c -> {
-			if(c instanceof UserCivilization){
-			return ((UserCivilization)c).UUIDS.stream().anyMatch(u -> {
-				return (u.equals(uuid));
-			});
+			if (c instanceof UserCivilization) {
+				return ((UserCivilization) c).UUIDS.stream().anyMatch(u -> {
+					return (u.equals(uuid));
+				});
 			}
 			return false;
 		}).findFirst();
-		if(opCivil.isPresent()){
-			return Optional.of((UserCivilization)opCivil.get());
+		if (opCivil.isPresent()) {
+			return Optional.of((UserCivilization) opCivil.get());
 		}
 		return Optional.empty();
 	}
-	
-	public static void reload(){
+
+	public static void reload() {
 		File folderUser = new File(ROOT_FILE, "User");
 		File folderDefault = new File(ROOT_FILE, "Default");
 		File[] filesUser = folderUser.listFiles();
@@ -169,7 +174,7 @@ public interface Civilization {
 				Saver saver = new Saver(f);
 				List<String> sectionS = saver.getList(String.class, DATA_SECTIONS);
 				String worldS = saver.get(String.class, DATA_WORLD);
-				if(worldS != null){
+				if (worldS != null) {
 					World world = Bukkit.getWorld(worldS);
 					Optional<String> section = sectionS.stream().filter(s -> {
 						String[] args = s.split(",");
@@ -190,7 +195,7 @@ public interface Civilization {
 				Saver saver = new Saver(f);
 				List<String> sectionS = saver.getList(String.class, DATA_SECTIONS);
 				String worldS = saver.get(String.class, DATA_WORLD);
-				if(worldS != null){
+				if (worldS != null) {
 					World world = Bukkit.getWorld(worldS);
 					Optional<String> section = sectionS.stream().filter(s -> {
 						String[] args = s.split(",");

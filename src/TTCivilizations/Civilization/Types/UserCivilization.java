@@ -15,6 +15,7 @@ import TTCivilizations.Civilization.Civilization;
 import TTCivilizations.Civilization.SectionedCivilization;
 import TTCivilizations.Civilization.Chunk.Section;
 import TTCivilizations.Civilization.Chunk.SectionType;
+import TTCivilizations.Civilization.Flags.CivilizationFlag;
 import TTCivilizations.Civilization.Roles.PlayerPermission;
 import TTCivilizations.Civilization.Roles.PlayerRole;
 import TTCivilizations.Mechs.CivilData;
@@ -33,8 +34,9 @@ public class UserCivilization extends SavableDataStore.AbstractSavableDataStore 
 
 	String NAME;
 	List<Section> SECTIONS;
+	List<CivilizationFlag<? extends Object>> FLAGS = new ArrayList<>();
 	public List<UUID> UUIDS = new ArrayList<>();
-	
+
 	public UserCivilization(String name) {
 		super(new File(ROOT_FILE, "User/" + name + ".yml"));
 		NAME = name;
@@ -221,6 +223,27 @@ public class UserCivilization extends SavableDataStore.AbstractSavableDataStore 
 			return CIVILS.add(this);
 		}
 		return false;
+	}
+
+	@Override
+	public List<CivilizationFlag<? extends Object>> getFlags() {
+		return FLAGS;
+	}
+
+	@Override
+	public Optional<CivilizationFlag<? extends Object>> getFlag(String name) {
+		Optional<CivilizationFlag<? extends Object>> opFlag = FLAGS.stream().filter(f -> f.getName().equalsIgnoreCase(name)).findFirst();
+		if(opFlag.isPresent()){
+			return opFlag;
+		}else{
+			Optional<CivilizationFlag<? extends Object>> opFlag2 = CivilizationFlag.LIST.stream().filter(f -> f.getName().equalsIgnoreCase(name)).findFirst();
+			if(opFlag2.isPresent()){
+				CivilizationFlag<? extends Object> flag = opFlag2.get().clone();
+				FLAGS.add(flag);
+				return Optional.of(flag);
+			}
+		}
+		return Optional.empty();
 	}
 
 }

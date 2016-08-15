@@ -1,11 +1,7 @@
 package TTCivilizations.Civilization.Roles;
 
 public enum PlayerRole {
-	
-	BUILDER,
-	DEFENDER,
-	ATTACKER,
-	GUARDENER,
-	NONE;
+
+	BUILDER, DEFENDER, ATTACKER, GUARDENER, NONE;
 
 }

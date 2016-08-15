@@ -19,7 +19,8 @@ public class Ticker {
 				Bukkit.getWorlds().stream().forEach(w -> {
 					w.getEntities().stream().forEach(e -> {
 						if (e instanceof Creature) {
-							Optional<SectionedCivilization> civil = Civilization.getLoadedByChunk(e.getLocation().getChunk());
+							Optional<SectionedCivilization> civil = Civilization
+									.getLoadedByChunk(e.getLocation().getChunk());
 							if (civil.isPresent()) {
 								e.remove();
 							}

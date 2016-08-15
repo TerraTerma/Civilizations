@@ -37,41 +37,43 @@ public class Listeners implements Listener {
 			Player player = (Player) entity;
 			// DEATH EVENT
 			TTPlayer ttPlayer = TTPlayer.getPlayer(player);
-			
-			Optional<SectionedCivilization> opCurrentCivil = Civilization.getLoadedByChunk(player.getLocation().getChunk());
+
+			Optional<SectionedCivilization> opCurrentCivil = Civilization
+					.getLoadedByChunk(player.getLocation().getChunk());
 			if (opCurrentCivil.isPresent()) {
-				if(opCurrentCivil.get() instanceof UserCivilization){
-				UserCivilization civil = (UserCivilization)opCurrentCivil.get();
-				if (civil.UUIDS.contains(player.getUniqueId())) {
-					event.setCancelled(true);
-				}
-			}
-			
-			if (event.isCancelled()) {
-				if(!player.getPlayer().getGameMode().equals(GameMode.CREATIVE)){
-				if (player.getHealth() <= event.getDamage()) {
-					CivilizationData data = ttPlayer.getSingleData(CivilizationData.class).get();
-					int power = data.getPower();
-					if (power != 0) {
-						data.setPower(power - 1);
-						ttPlayer.sendMessage(TTCivilizationsPlugins.getPlugin(), "Power is now " + data.getPower());
+				if (opCurrentCivil.get() instanceof UserCivilization) {
+					UserCivilization civil = (UserCivilization) opCurrentCivil.get();
+					if (civil.UUIDS.contains(player.getUniqueId())) {
+						event.setCancelled(true);
 					}
 				}
+			}
+
+			if (event.isCancelled()) {
+				if (!player.getPlayer().getGameMode().equals(GameMode.CREATIVE)) {
+					if (player.getHealth() <= event.getDamage()) {
+						CivilizationData data = ttPlayer.getSingleData(CivilizationData.class).get();
+						int power = data.getPower();
+						if (power != 0) {
+							data.setPower(power - 1);
+							ttPlayer.sendMessage(TTCivilizationsPlugins.getPlugin(), "Power is now " + data.getPower());
+						}
+					}
 				}
 			}
 		}
 	}
-	
+
 	@EventHandler
-	public void playerDamageEntity(EntityDamageByEntityEvent event){
+	public void playerDamageEntity(EntityDamageByEntityEvent event) {
 		TTCivilizationsPlugins plugin = TTCivilizationsPlugins.getPlugin();
 		Entity dEntity = event.getDamager();
 		Entity entity = event.getEntity();
-		if(dEntity instanceof Player){
-			TTPlayer damager = TTPlayer.getPlayer((Player)dEntity);
-			if(entity instanceof LivingEntity){
-				LivingEntity living = (LivingEntity)entity;
-				if(living.getHealth() <= event.getDamage()){
+		if (dEntity instanceof Player) {
+			TTPlayer damager = TTPlayer.getPlayer((Player) dEntity);
+			if (entity instanceof LivingEntity) {
+				LivingEntity living = (LivingEntity) entity;
+				if (living.getHealth() <= event.getDamage()) {
 					CivilizationData data = damager.getSingleData(CivilizationData.class).get();
 					data.setPower(data.getPower() + 1);
 					damager.sendMessage(plugin, "Power is now " + data.getPower());
@@ -108,11 +110,11 @@ public class Listeners implements Listener {
 
 		if (opCivilTo.isPresent()) {
 			if (opCivilFrom.isPresent()) {
-				Civilization civilTo = opCivilTo.get();
-				Civilization civilFrom = opCivilFrom.get();
+				SectionedCivilization civilTo = opCivilTo.get();
+				SectionedCivilization civilFrom = opCivilFrom.get();
 				if (!civilFrom.equals(civilTo)) {
 					if (opCivil.isPresent()) {
-						Civilization civil = opCivil.get();
+						UserCivilization civil = opCivil.get();
 						CivilRelationshipType relationship = civil.getOrCreateSingleData(CivilRelationshipData.class)
 								.getRelationshipWith(civilTo);
 						if (civilTo.equals(DefaultCivilization.WILDERNESS)) {
@@ -154,8 +156,8 @@ public class Listeners implements Listener {
 	@EventHandler
 	public void loadEvent(ChunkLoadEvent event) {
 		Civilization civil = Civilization.getByChunk(event.getChunk());
-		if(civil instanceof SectionedCivilization){
-			((SectionedCivilization)civil).load();
+		if (civil instanceof SectionedCivilization) {
+			((SectionedCivilization) civil).load();
 		}
 	}
 

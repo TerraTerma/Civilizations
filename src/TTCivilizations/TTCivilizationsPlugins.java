@@ -13,10 +13,10 @@ import TTCivilizations.Mechs.PlayerMechs.CivilizationData;
 import TTCore.Mech.DataHandler;
 
 public class TTCivilizationsPlugins extends JavaPlugin {
-	
+
 	static TTCivilizationsPlugins PLUGINS;
-	
-	public void onEnable(){
+
+	public void onEnable() {
 		PLUGINS = this;
 		getCommand("Civilization").setExecutor(new CommandLoader());
 		getServer().getPluginManager().registerEvents(new Listeners(), this);
@@ -26,8 +26,8 @@ public class TTCivilizationsPlugins extends JavaPlugin {
 		mechs.add(CivilRelationshipData.class);
 		mechs.add(CivilVaultData.class);
 	}
-	
-	public static TTCivilizationsPlugins getPlugin(){
+
+	public static TTCivilizationsPlugins getPlugin() {
 		return PLUGINS;
 	}
 

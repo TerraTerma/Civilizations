@@ -3,6 +3,7 @@ package TTCivilizations.Civilization.Types;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -13,21 +14,23 @@ import TTCivilizations.Civilization.Civilization;
 import TTCivilizations.Civilization.SectionedCivilization;
 import TTCivilizations.Civilization.Chunk.Section;
 import TTCivilizations.Civilization.Chunk.SectionType;
+import TTCivilizations.Civilization.Flags.CivilizationFlag;
 import TTCivilizations.Mechs.CivilData;
 import TTCore.Mech.DataHandler;
 import TTCore.Mech.DataHandlers.SavableData;
 import TTCore.Mech.DataStores.SavableDataStore;
 import TTCore.Savers.Saver;
 
-public class DefaultCivilization extends SavableDataStore.AbstractSavableDataStore implements SectionedCivilization{
+public class DefaultCivilization extends SavableDataStore.AbstractSavableDataStore implements SectionedCivilization {
 
 	public static final DefaultCivilization SAFE_ZONE = new DefaultCivilization("Safe Zone");
 	public static final DefaultCivilization WAR_ZONE = new DefaultCivilization("War Zone");
 	public static final Wilderness WILDERNESS = new Wilderness();
-	
+
 	String NAME;
 	List<Section> SECTIONS;
-	
+	List<CivilizationFlag<? extends Object>> FLAGS = new ArrayList<>();
+
 	public DefaultCivilization(String name) {
 		super(new File(ROOT_FILE, "Default/" + name + ".yml"));
 		NAME = name;
@@ -66,7 +69,7 @@ public class DefaultCivilization extends SavableDataStore.AbstractSavableDataSto
 			}
 		}
 	}
-	
+
 	@Override
 	public String getName() {
 		return NAME;
@@ -110,7 +113,7 @@ public class DefaultCivilization extends SavableDataStore.AbstractSavableDataSto
 		SECTIONS.add(new Section(name, type, chunk));
 		return this;
 	}
-	
+
 	@Override
 	public World getWorld() {
 		return SECTIONS.get(0).getChunk().getWorld();
@@ -125,7 +128,7 @@ public class DefaultCivilization extends SavableDataStore.AbstractSavableDataSto
 	public boolean unload() {
 		return CIVILS.remove(this);
 	}
-	
+
 	@Override
 	public void saveAll() {
 		Saver saver = new Saver(getFile());
@@ -153,6 +156,27 @@ public class DefaultCivilization extends SavableDataStore.AbstractSavableDataSto
 			return CIVILS.add(this);
 		}
 		return false;
+	}
+	
+	@Override
+	public List<CivilizationFlag<? extends Object>> getFlags() {
+		return FLAGS;
+	}
+
+	@Override
+	public Optional<CivilizationFlag<? extends Object>> getFlag(String name) {
+		Optional<CivilizationFlag<? extends Object>> opFlag = FLAGS.stream().filter(f -> f.getName().equalsIgnoreCase(name)).findFirst();
+		if(opFlag.isPresent()){
+			return opFlag;
+		}else{
+			Optional<CivilizationFlag<? extends Object>> opFlag2 = CivilizationFlag.LIST.stream().filter(f -> f.getName().equalsIgnoreCase(name)).findFirst();
+			if(opFlag2.isPresent()){
+				CivilizationFlag<? extends Object> flag = opFlag2.get().clone();
+				FLAGS.add(flag);
+				return Optional.of(flag);
+			}
+		}
+		return Optional.empty();
 	}
 
 }
